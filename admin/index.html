@@ -78,6 +78,22 @@
   .cat input:checked + span{background:var(--accent);border-color:var(--accent);color:#2a0f1b}
   .cat input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
 
+  .tagbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:50px}
+  .tagbox:focus-within{border-color:var(--accent)}
+  .tagbox input{flex:1;min-width:160px;border:none !important;background:transparent;padding:6px !important;min-height:34px !important}
+  .tchip{min-height:34px;padding:0 12px;border-radius:999px;border:none;background:var(--accent);color:#2a0f1b;font-size:13px;font-weight:500}
+  .tchip:hover{background:#fff}
+  .sugg{display:flex;flex-wrap:wrap;gap:6px}
+  .tsug{min-height:32px;padding:0 12px;border-radius:999px;border:1px dashed var(--line);background:transparent;color:var(--muted);font-size:12px}
+  .tsug:hover{border-color:var(--accent);color:var(--ink)}
+  @media (max-width:640px){
+    .top{padding:12px 16px}.brand small{display:none}.status{min-width:0}.status span{font-size:12px}
+    .wrap{padding:16px 12px 60px;gap:16px}
+    .side{max-width:none}
+    .imgs{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+    .card{padding:16px}
+    .drop{padding:24px 12px}
+  }
   .head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
   .head p{font-size:13px;color:var(--muted)}
 
@@ -162,7 +178,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const CATEGORIES = ["Graphic design", "Branding", "UI design"];
+const GROUPS = ["Food related", "Others"];   // the side menu on the site
+const TAG_SUGGESTIONS = ["Branding", "UI design", "Graphic design", "Packaging", "Illustration", "Campaign", "Social media", "Typography", "Web design", "Mascot"];
+// Older saves used "cats"; turn them into tags and give every project a group.
+const normalize = p => { const q = { ...p, group: p.group || "Food related", tags: Array.isArray(p.tags) ? p.tags : (p.cats || []) }; delete q.cats; return q; };
 const ICON = {
   up:   '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l4-4 4 4"/></svg>',
   down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>',
@@ -200,7 +219,7 @@ async function load(){
   let loaded = null;
   if (mode === 'online'){ try { const r = await fetch('/api/projects?t=' + Date.now(), {cache:'no-store'}); if (r.ok) loaded = await r.json(); } catch(e){} }
   if (!loaded){ try { const r = await fetch('/projects.json', {cache:'no-store'}); if (r.ok) loaded = await r.json(); } catch(e){} }
-  data = loaded && Array.isArray(loaded.projects) ? loaded : { projects: [] };
+  data = loaded && Array.isArray(loaded.projects) ? { ...loaded, projects: loaded.projects.map(normalize) } : { projects: [] };
   renderList(); renderEditor();
   if (mode === 'local'){
     try { const r = await fetch('/api/ping', {method:'POST'}); serverOK = r.status !== 501 && r.status !== 405; }
@@ -257,7 +276,7 @@ function renderList(){
     if (p.images && p.images[0]) thumb.style.backgroundImage = `url("${view(p.images[0])}")`; else thumb.innerHTML = ICON.img;
     const meta = el('div', {className:'meta'}, [
       el('div', {className:'t', textContent: p.title || 'Untitled'}),
-      el('div', {className:'s', textContent: [p.year, (p.images||[]).length + ' image' + ((p.images||[]).length===1?'':'s')].filter(Boolean).join(' · ')})
+      el('div', {className:'s', textContent: [p.group, p.year, (p.images||[]).length + ' img'].filter(Boolean).join(' · ')})
     ]);
     const up = el('button', {className:'icon', type:'button', innerHTML:ICON.up, disabled:i===0, title:'Move up'}); up.setAttribute('aria-label','Move ' + (p.title||'project') + ' up');
     const dn = el('button', {className:'icon', type:'button', innerHTML:ICON.down, disabled:i===data.projects.length-1, title:'Move down'}); dn.setAttribute('aria-label','Move ' + (p.title||'project') + ' down');
@@ -277,7 +296,7 @@ function move(i, d){
   renderList(); scheduleSave();
 }
 $('#addProject').onclick = () => {
-  data.projects.unshift({ id: 'project-' + Date.now().toString(36), title:'', subtitle:'', year: String(new Date().getFullYear()), cats:[], desc:'', images:[] });
+  data.projects.unshift({ id: 'project-' + Date.now().toString(36), title:'', subtitle:'', year: String(new Date().getFullYear()), group: GROUPS[0], tags:[], desc:'', images:[] });
   sel = 0; renderList(); renderEditor(); scheduleSave();
   setTimeout(()=>$('#f-title') && $('#f-title').focus(), 50);
 };
@@ -297,19 +316,50 @@ function renderEditor(){
   const desc = el('textarea', {id:'f-desc', value: p.desc || '', placeholder:'What was the brief, what did you make, what are you proud of?'});
   desc.oninput = () => { p.desc = desc.value; scheduleSave(); };
 
-  const cats = el('div', {className:'cats', role:'group'}); cats.setAttribute('aria-labelledby','cats-lbl');
-  CATEGORIES.forEach(c => {
-    const cb = el('input', {type:'checkbox', checked: (p.cats||[]).includes(c)});
-    cb.onchange = () => { p.cats = CATEGORIES.filter(x => x===c ? cb.checked : (p.cats||[]).includes(x)); scheduleSave(); };
-    cats.append(el('label', {className:'cat'}, [cb, el('span',{textContent:c})]));
+  // group: one of the side-menu sections
+  const groups = el('div', {className:'cats', role:'radiogroup'}); groups.setAttribute('aria-labelledby','grp-lbl');
+  GROUPS.forEach(g => {
+    const rb = el('input', {type:'radio', name:'grp', checked: p.group === g});
+    rb.onchange = () => { if (rb.checked){ p.group = g; scheduleSave(); } };
+    groups.append(el('label', {className:'cat'}, [rb, el('span',{textContent:g})]));
   });
-  const catField = el('div',{className:'field wide'},[el('div',{className:'lbl', id:'cats-lbl', textContent:'Categories'}), cats]);
+  const groupField = el('div',{className:'field wide'},[el('div',{className:'lbl', id:'grp-lbl', textContent:'Show under'}), groups]);
+
+  // tags: free text chips, with quick suggestions
+  p.tags = p.tags || [];
+  const tagWrap = el('div',{className:'tagbox'});
+  const tagInput = el('input',{type:'text', id:'f-tags', placeholder:'Type a tag and press Enter'});
+  const sugg = el('div',{className:'sugg'});
+  function drawTags(){
+    tagWrap.textContent = '';
+    p.tags.forEach((t, i) => {
+      const x = el('button',{type:'button', className:'tchip', textContent: t + '  ✕'}); x.setAttribute('aria-label','Remove tag ' + t);
+      x.onclick = () => { p.tags.splice(i,1); drawTags(); scheduleSave(); };
+      tagWrap.append(x);
+    });
+    tagWrap.append(tagInput);
+    sugg.textContent = '';
+    TAG_SUGGESTIONS.filter(t => !p.tags.some(x => x.toLowerCase() === t.toLowerCase())).forEach(t => {
+      const b = el('button',{type:'button', className:'tsug', textContent:'+ ' + t}); b.onclick = () => addTag(t); sugg.append(b);
+    });
+  }
+  function addTag(t){ t = t.trim().replace(/\s+/g,' ').slice(0,30); if (!t || p.tags.some(x => x.toLowerCase() === t.toLowerCase())) return;
+    p.tags.push(t); drawTags(); scheduleSave(); tagInput.focus(); }
+  tagInput.onkeydown = e => {
+    if (e.key === 'Enter' || e.key === ','){ e.preventDefault(); addTag(tagInput.value); tagInput.value = ''; }
+    if (e.key === 'Backspace' && !tagInput.value && p.tags.length){ p.tags.pop(); drawTags(); scheduleSave(); }
+  };
+  tagInput.onblur = () => { if (tagInput.value.trim()){ addTag(tagInput.value); tagInput.value = ''; } };
+  drawTags();
+  const tagLbl = el('label',{htmlFor:'f-tags', textContent:'Tags'});
+  const catField = el('div',{className:'field wide'},[tagLbl, tagWrap, sugg]);
 
   ed.append(el('div',{className:'card'},[
     el('div',{className:'fields'},[
       field('f-title','Project title', text('f-title','title','e.g. FYFTH','title'), true),
       field('f-sub','Short line', text('f-sub','subtitle','e.g. Coconut gelato')),
       field('f-year','Year', text('f-year','year','e.g. 2025 or 2023–2024')),
+      groupField,
       catField,
       field('f-desc','Description', desc, true)
     ])
