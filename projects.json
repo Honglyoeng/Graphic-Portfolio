@@ -1,0 +1,60 @@
+{
+  "projects": [
+    {
+      "id": "fyfth",
+      "title": "FYFTH",
+      "subtitle": "Coconut gelato",
+      "year": "",
+      "cats": [
+        "Graphic design",
+        "Branding"
+      ],
+      "desc": "Social campaigns, mascot illustrations, packaging and a gelato cart for FYFTH, a Cambodian coconut gelato brand.",
+      "images": [
+        "works/fyfth-back-to-school.avif",
+        "works/1.avif",
+        "works/3.avif",
+        "works/4.avif",
+        "works/5.avif",
+        "works/6.avif",
+        "works/7.avif"
+      ]
+    },
+    {
+      "id": "hattakamakarn",
+      "title": "Hattakamakarn",
+      "subtitle": "House of Handmade sriracha",
+      "year": "",
+      "cats": [
+        "Branding",
+        "Graphic design",
+        "UI design"
+      ],
+      "desc": "Rebrand for the world's first sriracha sauce: a mark inspired by the family's old house and the chilli-shaped H, packaging, campaign posters and a website.",
+      "images": [
+        "works/1-2ae4cc.avif",
+        "works/2-82d2ae.avif",
+        "works/3-85b30e.avif",
+        "works/4-88ac69.avif",
+        "works/5-69b06d.avif",
+        "works/6-c35781.avif",
+        "works/7-5db431.avif",
+        "works/8-c1669a.avif",
+        "works/9-c6f79d.avif",
+        "works/10-8488ea.avif",
+        "works/11-359103.avif"
+      ]
+    },
+    {
+      "id": "phranakhon-saimai",
+      "title": "Phranakhon Saimai",
+      "subtitle": "Ayutthaya 1963",
+      "year": "",
+      "cats": [
+        "Branding"
+      ],
+      "desc": "Gift box and stationery for a heritage Saimai (cotton candy) brand from Ayutthaya.",
+      "images": []
+    }
+  ]
+}

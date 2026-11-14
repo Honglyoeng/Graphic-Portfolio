@@ -1,0 +1,7 @@
+server.py
+node_modules
+.claude
+README.md
+.env*
+.vercel
+package-lock.json.bak

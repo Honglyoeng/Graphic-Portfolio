@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Name — Graphic Design</title>
+<meta name="description" content="Portfolio of graphic design and visual work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a1d24; --ink:#f4ebee; --muted:#98aeae; --accent:#f39bbd;
+    --glass:rgba(9,26,32,.55); --line:rgba(244,235,238,.14);
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f2eb; --ink:#2a2828; --muted:#7f7b72; --accent:#d64a85;
+    --glass:rgba(246,242,235,.62); --line:rgba(42,40,40,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-weight:300;
+       line-height:1.6;overflow-x:hidden;transition:background .6s,color .6s}
+  body.boat-cursor, body.boat-cursor *{cursor:none !important}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .serif{font-family:"Cormorant Garamond",Georgia,serif}
+
+  #pond{position:absolute;left:0;top:0;width:100%;height:100vh;height:100svh;z-index:0;display:block}
+  main,header,footer{position:relative;z-index:1}
+
+  /* cursor dot (the boat is drawn on the canvas and follows it softly) */
+  .dot{position:fixed;left:0;top:0;width:6px;height:6px;border-radius:50%;background:var(--accent);
+       pointer-events:none;z-index:200;transform:translate(-50%,-50%);
+       transition:width .3s,height .3s,background .3s,border-color .3s,opacity .3s;border:1px solid transparent}
+  .dot.hover{width:42px;height:42px;background:transparent;border-color:var(--accent)}
+  body:not(.boat-cursor) .dot{display:none}
+
+  /* nav */
+  header{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+         padding:22px clamp(16px,4vw,48px);transition:background .4s,padding .4s}
+  header.solid{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding-block:14px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:"Cormorant Garamond",serif;font-size:22px;font-style:italic;letter-spacing:.02em}
+  .logo svg{width:26px;height:26px}
+  nav{display:flex;gap:clamp(14px,3vw,34px);align-items:center;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+  nav a{opacity:.75;transition:opacity .3s}
+  nav a:hover{opacity:1}
+  .theme-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);
+             display:grid;place-items:center;transition:border-color .3s}
+  .theme-btn:hover{border-color:var(--accent)}
+  .theme-btn svg{width:14px;height:14px}
+
+  /* hero */
+  .hero{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+        text-align:center;padding:0 16px;pointer-events:none}
+  .hero .eyebrow{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  .hero h1{font-family:"Cormorant Garamond",serif;font-weight:300;font-style:italic;
+           font-size:clamp(56px,11vw,150px);line-height:.95;letter-spacing:-.01em;
+           text-shadow:0 2px 30px var(--bg),0 0 60px var(--bg)}
+  .hero p{margin-top:22px;max-width:440px;color:var(--muted);font-size:15px;text-shadow:0 0 20px var(--bg)}
+  .hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.28em;
+        text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:12px;opacity:.8}
+  .hint i{width:1px;height:40px;background:linear-gradient(var(--muted),transparent);animation:drip 2.4s ease-in-out infinite}
+  @keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}
+                  51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* sections */
+  section{padding:120px clamp(16px,5vw,64px)}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:48px;max-width:1280px;margin-inline:auto}
+  .sec-head h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(40px,6vw,72px);line-height:1}
+  .sec-head h2 em{color:var(--accent)}
+  /* work area: side category navigation + gallery */
+  .work-wrap{display:grid;grid-template-columns:240px 1fr;gap:clamp(32px,5vw,80px);max-width:1440px;margin:0 auto;align-items:start}
+  .side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .side h2{font-family:"Cormorant Garamond",serif;font-weight:300;font-style:italic;font-size:15px;letter-spacing:.06em;color:var(--muted);margin-bottom:22px}
+  .filters{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+  .chip{font:inherit;font-size:clamp(20px,1.9vw,28px);font-weight:300;background:none;border:none;padding:2px 0;color:var(--ink);
+        opacity:.38;text-align:left;position:relative;transition:opacity .4s,transform .4s;text-shadow:0 0 18px var(--bg)}
+  .chip:hover{opacity:.75;transform:translateX(4px)}
+  .chip.on{opacity:1;font-weight:400}
+  .chip.on::before{content:"";position:absolute;left:-22px;top:50%;width:8px;height:8px;border-radius:50% 0 50% 0;
+        background:var(--accent);transform:translateY(-50%) rotate(45deg)}
+  .side .count{margin-top:28px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+  /* gallery (masonry) */
+  .grid{columns:3 260px;column-gap:24px;padding:120px 0 40px}
+  .card{break-inside:avoid;margin:0 0 28px;display:block;opacity:0;transform:translateY(30px);
+        transition:opacity 1s ease,transform 1s cubic-bezier(.2,.7,.2,1)}
+  .card.in{opacity:1;transform:none}
+  .card.hide{display:none}
+  .card .frame{overflow:hidden;border-radius:6px;background:var(--glass);box-shadow:0 20px 50px -25px rgba(0,0,0,.5)}
+  .card img{width:100%;height:auto;transition:transform 1.2s cubic-bezier(.2,.7,.2,1),filter .6s}
+  .card:hover img{transform:scale(1.04)}
+  .card figcaption{display:flex;justify-content:space-between;align-items:baseline;padding:14px 4px 0;gap:12px}
+  .card .t{font-family:"Cormorant Garamond",serif;font-size:22px;font-style:italic}
+  .card .m{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+
+  /* about */
+  .about{max-width:980px;margin:0 auto;text-align:center}
+  .about .lead{font-family:"Cormorant Garamond",serif;font-size:clamp(26px,3.2vw,40px);line-height:1.25;font-weight:300}
+  .about .lead em{color:var(--accent)}
+  .panel{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);
+         border-radius:8px;padding:32px}
+  .panel h3{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-bottom:12px}
+  .panel ul{list-style:none;margin-bottom:28px}
+  .panel ul:last-child{margin-bottom:0}
+  .panel li{padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+
+  /* contact */
+  .contact{text-align:center;padding-bottom:40px}
+  .contact .eyebrow{font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+  .contact a.mail{display:inline-block;margin-top:18px;font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;
+                  font-size:clamp(36px,7vw,96px);line-height:1.1;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+                  transition:background-size .6s;word-break:break-word}
+  .contact a.mail:hover{background-size:100% 1px;color:var(--accent)}
+  .socials{display:flex;justify-content:center;gap:28px;margin-top:36px;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+  .socials a{opacity:.7;transition:opacity .3s}.socials a:hover{opacity:1;color:var(--accent)}
+  .shore{position:relative;height:clamp(220px,26vw,340px);margin-top:-20px}
+  .shore canvas{display:block;width:100%;height:100%}
+  footer{text-align:center;padding:8px 16px 40px;font-size:12px;color:var(--muted);letter-spacing:.08em}
+
+  /* project pop-up */
+  .pm{position:fixed;inset:0;z-index:150;overflow-y:auto;overscroll-behavior:contain;
+      background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+      opacity:0;pointer-events:none;transition:opacity .45s}
+  .pm.open{opacity:1;pointer-events:auto}
+  .pm-box{position:relative;max-width:1180px;margin:clamp(16px,5vh,56px) auto;padding:clamp(24px,4vw,56px);background:var(--bg);
+          border:1px solid var(--line);border-radius:14px;box-shadow:0 40px 120px -40px rgba(0,0,0,.7);
+          transform:translateY(24px);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .pm.open .pm-box{transform:none}
+  .pm-close{position:sticky;top:12px;float:right;margin:-12px -12px 0 0;z-index:2;min-height:44px;padding:0 18px;border-radius:999px;
+            border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .pm-close:hover{border-color:var(--accent);color:var(--accent)}
+  .pm-head{display:flex;flex-wrap:wrap;gap:24px 64px;align-items:flex-end;justify-content:space-between;margin-bottom:28px;clear:none}
+  .pm-head h3{font-family:"Cormorant Garamond",serif;font-weight:300;font-style:italic;font-size:clamp(44px,7vw,88px);line-height:1}
+  .pm-sub{margin-top:10px;color:var(--muted);font-size:15px}
+  .pm-facts{display:flex;gap:32px;flex-wrap:wrap;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .pm-facts b{display:block;font-weight:400;color:var(--ink);letter-spacing:.04em;text-transform:none;font-size:15px;margin-top:6px}
+  .pm-desc{max-width:680px;font-size:17px;line-height:1.75;margin-bottom:48px;white-space:pre-line}
+  .pm-imgs{display:flex;flex-direction:column;gap:clamp(14px,2vw,24px)}
+  .pm-imgs img{width:100%;height:auto;border-radius:8px;background:var(--glass)}
+  .pm-empty{padding:60px 20px;border:1px dashed var(--line);border-radius:8px;text-align:center;color:var(--muted)}
+  .pm-nav{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:28px;border-top:1px solid var(--line)}
+  .pm-nav button{background:none;border:none;color:var(--ink);font:inherit;text-align:left;min-height:44px;padding:0;opacity:.75;transition:opacity .3s,color .3s}
+  .pm-nav button:last-child{text-align:right}
+  .pm-nav button:hover{opacity:1;color:var(--accent)}
+  .pm-nav small{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .pm-nav span{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:26px}
+  body.locked{overflow:hidden}
+  .card .count{position:absolute;right:12px;bottom:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:999px;
+               background:rgba(10,29,36,.7);color:#f4ebee;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .card .frame{position:relative}
+  .card .sub{display:block;padding:2px 4px 0;font-size:13px;color:var(--muted)}
+  .grid-msg{color:var(--muted);padding:40px 0}
+
+  @media (max-width:900px){
+    .work-wrap{grid-template-columns:1fr;gap:0}
+    .side{position:sticky;top:0;height:auto;z-index:5;padding:80px 0 14px;background:linear-gradient(var(--bg) 70%,transparent)}
+    .side h2,.side .count{display:none}
+    .filters{flex-direction:row;gap:22px;overflow-x:auto;scrollbar-width:none}
+    .chip{font-size:17px;white-space:nowrap}
+    .chip.on::before{left:50%;top:auto;bottom:-8px;width:5px;height:5px;transform:translateX(-50%) rotate(45deg)}
+    .grid{padding-top:24px}
+  }
+  @media (max-width:760px){
+    nav a.hide-m{display:none}
+    .about{grid-template-columns:1fr}
+    section{padding:90px 16px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card{transition:none;opacity:1;transform:none}
+    .hint i{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="pond" aria-hidden="true"></canvas>
+<div class="dot" id="dot"></div>
+
+<header>
+  <a href="#top" class="logo" aria-label="Home">
+    <svg viewBox="0 0 32 32" fill="none"><g fill="currentColor" opacity=".9">
+      <path d="M16 6c3 4 3 10 0 16-3-6-3-12 0-16Z"/>
+      <path d="M6 13c5 0 8.5 4 10 9-5 0-8.5-3.5-10-9Z" opacity=".7"/>
+      <path d="M26 13c-5 0-8.5 4-10 9 5 0 8.5-3.5 10-9Z" opacity=".7"/></g>
+      <path d="M5 25.5c3.7 1.4 7.4 2 11 2s7.3-.6 11-2" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity=".6"/>
+    </svg>
+    Your Name
+  </a>
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#about" class="hide-m">About</a>
+    <a href="#contact">Contact</a>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle light / dark pond">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5v11a5.5 5.5 0 0 1 0-11Z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="eyebrow">Graphic design · Illustration · Identity</div>
+    <h1>Your Name</h1>
+    <p>Quiet visuals, grown slowly — like lotus on still water.</p>
+    <div class="hint">drift · click to ripple<i></i></div>
+  </section>
+
+  <section id="work" style="padding-top:0;padding-bottom:0">
+    <div class="work-wrap">
+      <aside class="side">
+        <h2>Selected works</h2>
+        <div class="filters" id="filters" role="tablist" aria-label="Categories"></div>
+        <div class="count" id="count"></div>
+      </aside>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="about">
+      <p class="lead">I'm a graphic designer drawn to <em>calm, organic forms</em> — the lotus, still water, the space between things. I work across graphic design, branding and UI — campaigns, identities and interfaces that feel unhurried and intentional.</p>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="eyebrow">Let's make something calm</div>
+    <a class="mail" href="mailto:hello@yourname.com">hello@yourname.com</a>
+    <div class="socials">
+      <a href="#" target="_blank" rel="noopener">Instagram</a>
+      <a href="#" target="_blank" rel="noopener">Behance</a>
+      <a href="#" target="_blank" rel="noopener">Dribbble</a>
+    </div>
+  </section>
+</main>
+
+<div class="shore" aria-hidden="true"><canvas id="shore"></canvas></div>
+<footer>© <span id="yr"></span> Your Name — made on still water</footer>
+
+<div class="pm" id="pm" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+  <div class="pm-box">
+    <button class="pm-close" id="pmClose" type="button">Close ✕</button>
+    <div class="pm-head">
+      <div><h3 id="pmTitle"></h3><div class="pm-sub" id="pmSub"></div></div>
+      <div class="pm-facts"><div>Year<b id="pmYear"></b></div><div>Category<b id="pmCats"></b></div></div>
+    </div>
+    <p class="pm-desc" id="pmDesc"></p>
+    <div class="pm-imgs" id="pmImgs"></div>
+    <div class="pm-nav"><button type="button" id="pmPrev"></button><button type="button" id="pmNext"></button></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   PROJECTS come from projects.json — edit them in Backstage (/admin),
+   which needs `python3 server.py` running. See README.md.
+   ===================================================================== */
+
+/* ===================== placeholder art (until you add images) ===================== */
+const PALS = [
+  ["#0b2a33","#b8466e","#f08cb8","#ffd6e6","#3fbf6a"],
+  ["#f5efe6","#e0559a","#f4a6c8","#fbe1ec","#a9cf86"],
+  ["#13262b","#e6c46e","#f39bbd","#ffe3ee","#5fae7a"],
+  ["#fbe9ef","#c93f78","#ef8fb6","#ffffff","#8fbf74"],
+  ["#1d3a35","#f6b1c9","#f8d1df","#fff4f8","#9fd28a"],
+  ["#efe7da","#2b4b45","#e77fa8","#f7c6d9","#b9d79a"],
+];
+function petal(L,w){return `M0 0C${L*.3} ${w} ${L*.75} ${w*.8} ${L} 0C${L*.75} ${-w*.8} ${L*.3} ${-w} 0 0Z`}
+function placeholder(i, ratio){
+  const p = PALS[i % PALS.length], W = 800, H = Math.round(800*ratio), cx = W/2, cy = H/2, m = i % 4;
+  let g = `<rect width="${W}" height="${H}" fill="${p[0]}"/>`;
+  if (m === 0) { // rings + top-down lotus
+    for (let k=1;k<7;k++) g += `<circle cx="${cx}" cy="${cy}" r="${k*70}" fill="none" stroke="${p[2]}" stroke-opacity="${.5-k*.06}" stroke-width="1.5"/>`;
+    g += topLotus(cx, cy, 150, p);
+  } else if (m === 1) { // side lotus over horizon
+    g += `<ellipse cx="${cx}" cy="${H*.68}" rx="${W*.42}" ry="${H*.05}" fill="${p[4]}" opacity=".7"/>`;
+    const angs = [-70,-45,-22,0,22,45,70];
+    angs.forEach((a,k)=>{ const L = 240 - Math.abs(a)*1.2;
+      g += `<path d="${petal(L,L*.32)}" fill="${k%2?p[2]:p[1]}" opacity=".62" transform="translate(${cx} ${H*.66}) rotate(${a-90})"/>`;});
+    g += `<circle cx="${W*.78}" cy="${H*.2}" r="40" fill="${p[3]}" opacity=".8"/>`;
+  } else if (m === 2) { // scattered pads + small lotus
+    const pts = [[.3,.3,110],[.7,.42,80],[.38,.72,130],[.75,.8,60]];
+    pts.forEach(([x,y,r],k)=>{ g += `<path d="M0 0 L${r} -${r*.18} A${r} ${r} 0 1 1 ${r} ${r*.18} Z" fill="${p[4]}" opacity="${.9-k*.12}" transform="translate(${x*W} ${y*H}) rotate(${k*70})"/>`;});
+    g += topLotus(W*.3, H*.3, 60, p) + topLotus(W*.7, H*.42, 42, p);
+  } else { // single big petal composition
+    for (let k=0;k<5;k++) g += `<path d="${petal(H*.55,H*.17)}" fill="${[p[1],p[2],p[3],p[2],p[1]][k]}" opacity=".55" transform="translate(${cx} ${H*.82}) rotate(${-90+(k-2)*16})"/>`;
+    g += `<line x1="${W*.15}" y1="${H*.82}" x2="${W*.85}" y2="${H*.82}" stroke="${p[3]}" stroke-opacity=".5"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+function topLotus(x,y,r,p){
+  let s = `<g transform="translate(${x} ${y})">`;
+  [[8,1,.36,0,p[1]],[8,.86,.34,22.5,p[2]],[6,.56,.3,0,p[3]]].forEach(([n,L,w,off,c])=>{
+    for (let k=0;k<n;k++) s += `<path d="${petal(r*L,r*w)}" fill="${c}" transform="rotate(${off+k*360/n})"/>`;});
+  return s + `<circle r="${r*.17}" fill="#e6bf3c"/></g>`;
+}
+
+/* ===================== gallery (one card per project) ===================== */
+const grid = document.getElementById('grid'), filtersEl = document.getElementById('filters'), countEl = document.getElementById('count');
+const CATEGORIES = ['Graphic design','Branding','UI design'];
+let PROJECTS = [], activeCat = 'All works';
+const shown = () => PROJECTS.filter(p => activeCat==='All works' || (p.cats||[]).includes(activeCat));
+const ratioOf = i => [1, 1.25, 0.8, 1.1][i % 4];
+function imgSrc(img, src, i){ img.onerror = ()=>{ img.onerror = null; img.src = placeholder(i, ratioOf(i)); }; img.src = src || placeholder(i, ratioOf(i)); }
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+
+function renderGrid(){
+  grid.textContent = '';
+  const list = shown();
+  if (!list.length){ grid.append(el('p','grid-msg', PROJECTS.length ? 'No projects in this category yet.' : 'No projects yet — add some in Backstage.')); }
+  list.forEach((p, k) => {
+    const i = PROJECTS.indexOf(p);
+    const fig = el('figure','card'); fig.tabIndex = 0; fig.setAttribute('role','button');
+    fig.setAttribute('aria-label', `Open project ${p.title || 'Untitled'}`);
+    const frame = el('div','frame'), img = el('img'); img.loading = 'lazy'; img.alt = p.title || '';
+    imgSrc(img, (p.images||[])[0], i); frame.append(img);
+    const n = (p.images||[]).length; if (n > 1) frame.append(el('span','count', n + ' images'));
+    const cap = el('figcaption'); cap.append(el('span','t', p.title || 'Untitled'), el('span','m', p.year || ''));
+    fig.append(frame, cap);
+    if (p.subtitle) fig.append(el('span','sub', p.subtitle));
+    fig.onclick = () => openProject(i, fig);
+    fig.onkeydown = e => { if (e.key==='Enter' || e.key===' ') { e.preventDefault(); openProject(i, fig); } };
+    fig.style.transitionDelay = (k%3)*0.12 + 's';
+    grid.append(fig); io.observe(fig);
+  });
+  const c = list.length; countEl.textContent = String(c).padStart(2,'0') + (c===1 ? ' project' : ' projects');
+}
+const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:.08});
+
+['All works', ...CATEGORIES].forEach(c=>{
+  const b = document.createElement('button');
+  b.className = 'chip' + (c==='All works'?' on':''); b.textContent = c; b.setAttribute('role','tab');
+  b.onclick = ()=>{ activeCat = c;
+    filtersEl.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x===b));
+    renderGrid(); document.getElementById('work').scrollIntoView({behavior:'smooth'}); };
+  filtersEl.appendChild(b);
+});
+
+// Online (Vercel) the saved projects come from /api/projects; locally that 404s and projects.json is used.
+fetch('/api/projects').then(r => r.ok ? r.json() : Promise.reject())
+  .catch(() => fetch('projects.json', {cache:'no-store'}).then(r => r.ok ? r.json() : Promise.reject()))
+  .then(d => { PROJECTS = Array.isArray(d.projects) ? d.projects : []; renderGrid(); })
+  .catch(() => { grid.textContent = ''; grid.append(el('p','grid-msg','Projects could not be loaded. Open the site through a web server (run python3 server.py) instead of double-clicking the file.')); });
+
+/* ===================== project pop-up ===================== */
+const pm = document.getElementById('pm'); let pmIdx = -1, pmReturn = null;
+function openProject(i, from){
+  const p = PROJECTS[i]; if (!p) return; pmIdx = i; if (from) pmReturn = from;
+  document.getElementById('pmTitle').textContent = p.title || 'Untitled';
+  document.getElementById('pmSub').textContent = p.subtitle || '';
+  document.getElementById('pmYear').textContent = p.year || '—';
+  document.getElementById('pmCats').textContent = (p.cats||[]).join(', ') || '—';
+  document.getElementById('pmDesc').textContent = p.desc || '';
+  const box = document.getElementById('pmImgs'); box.textContent = '';
+  (p.images||[]).forEach((src, k) => { const img = el('img'); img.alt = `${p.title} — image ${k+1}`; img.loading = k < 2 ? 'eager' : 'lazy'; img.src = src; box.append(img); });
+  if (!(p.images||[]).length) box.append(el('div','pm-empty','Images coming soon.'));
+  const list = shown().length ? shown() : PROJECTS, k = list.indexOf(p);
+  const prev = list[(k-1+list.length)%list.length], next = list[(k+1)%list.length];
+  const nav = (btn, q, label) => { btn.textContent = ''; btn.hidden = list.length < 2;
+    btn.append(el('small', null, label), el('span', null, q.title || 'Untitled')); btn.onclick = () => openProject(PROJECTS.indexOf(q)); };
+  nav(document.getElementById('pmPrev'), prev, '← Previous'); nav(document.getElementById('pmNext'), next, 'Next →');
+  pm.scrollTop = 0; pm.classList.add('open'); document.body.classList.add('locked');
+  document.getElementById('pmClose').focus({preventScroll:true});
+}
+function closeProject(){ pm.classList.remove('open'); document.body.classList.remove('locked'); pmIdx = -1; if (pmReturn) pmReturn.focus({preventScroll:true}); }
+document.getElementById('pmClose').onclick = closeProject;
+pm.addEventListener('click', e => { if (e.target === pm) closeProject(); });
+addEventListener('keydown', e => {
+  if (!pm.classList.contains('open')) return;
+  if (e.key==='Escape') closeProject();
+  if (e.key==='ArrowRight') document.getElementById('pmNext').click();
+  if (e.key==='ArrowLeft') document.getElementById('pmPrev').click();
+  if (e.key==='Tab'){ // keep focus inside the pop-up
+    const f = [...pm.querySelectorAll('button:not([hidden])')]; const a = f[0], z = f[f.length-1];
+    if (e.shiftKey && document.activeElement===a){ e.preventDefault(); z.focus(); }
+    else if (!e.shiftKey && document.activeElement===z){ e.preventDefault(); a.focus(); }
+  }
+});
+const hdr=document.querySelector('header');
+addEventListener('scroll',()=>hdr.classList.toggle('solid',scrollY>innerHeight*.6),{passive:true});
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ===================== theme ===================== */
+const root = document.documentElement;
+function store(k,v){ try{ v===undefined ? v=localStorage.getItem(k) : localStorage.setItem(k,v); }catch(e){} return v; }
+let themeName = store('pond-theme') || 'dark';
+root.dataset.theme = themeName;
+document.getElementById('themeBtn').onclick = ()=>{
+  themeName = themeName==='dark'?'light':'dark'; root.dataset.theme = themeName; store('pond-theme', themeName); bgGrad = null;
+};
+
+/* ===================== THE POND ===================== */
+const THEMES = {
+  dark:{ bg0:'#0f2c35', bg1:'#06141a', line:'rgba(120,170,190,.07)',
+    pads:['#2ec05a','#6dc28f','#3fa864'], padCore:'#0d5a28', vein:'rgba(200,255,190,.35)',
+    petals:['#b8466e','#e47ca5','#ffc2d9'], core:'#e3b83a',
+    ripple:[230,203,130], wake:[220,240,240], boat:'#f7f0e4', boatShade:'#d8ccb6', shadow:'rgba(0,0,0,.32)' },
+  light:{ bg0:'#fdfaf5', bg1:'#efe8dc', line:'rgba(120,140,110,.09)',
+    pads:['#a6cf84','#c2dda0','#8fc073'], padCore:'#6f9d58', vein:'rgba(255,255,240,.6)',
+    petals:['#de5596','#f08cb8','#fcd3e4'], core:'#f0c444',
+    ripple:[120,150,110], wake:[120,150,140], boat:'#ffffff', boatShade:'#e8e1d4', shadow:'rgba(70,80,60,.14)' }
+};
+const cv = document.getElementById('pond'), ctx = cv.getContext('2d');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
+if (finePointer) document.body.classList.add('boat-cursor');
+
+let W=0, H=0, DPR=1, objs=[], ripples=[], trail=[], bgGrad=null;
+const PETAL = new Path2D('M0 0C.3 1 .75 .8 1 0C.75 -.8 .3 -1 0 0Z');
+const mouse = { x:innerWidth*.5, y:innerHeight*.62, last:-1e9 };
+const boat = { x:innerWidth*.5, y:innerHeight*.7, vx:0, vy:0, a:-Math.PI/2, dist:0 };
+const rand = (a,b)=>a+Math.random()*(b-a);
+
+function makePad(r){
+  const p = new Path2D(), notch = rand(.16,.26), k = Math.floor(rand(5,9)), seed = rand(0,9), steps = 56;
+  p.moveTo(0,0);
+  for (let i=0;i<=steps;i++){
+    const a = notch + (Math.PI*2-2*notch)*i/steps;
+    const rr = r*(1 + .035*Math.sin(a*k+seed) + .015*Math.sin(a*17+seed*2));
+    p.lineTo(Math.cos(a)*rr, Math.sin(a)*rr);
+  }
+  p.closePath();
+  const veins = []; const nv = Math.floor(rand(9,14));
+  for (let i=0;i<nv;i++){ const a = notch+.25 + (Math.PI*2-2*notch-.5)*i/(nv-1); veins.push(a); }
+  return { path:p, veins };
+}
+
+function layout(){
+  objs = [];
+  const n = Math.round(Math.min(26, Math.max(9, W*H/58000)));
+  const scale = Math.min(1.15, Math.max(.6, Math.min(W,H)/850));
+  let tries = 0;
+  while (objs.length < n && tries++ < 3000){
+    const roll = Math.random();
+    const type = roll < .38 ? 'padLotus' : roll < .72 ? 'pad' : 'lotus';
+    const r = (type==='lotus' ? rand(26,48) : rand(50,105)) * scale;
+    const x = rand(-r*.3, W+r*.3), y = rand(-r*.3, H+r*.3);
+    // keep the center (hero title) a little calmer
+    const ex = (x-W/2)/(W*.26), ey = (y-H/2)/(H*.2);
+    if (ex*ex+ey*ey < 1 && Math.random() < .8) continue;
+    if (objs.some(o=>Math.hypot(o.hx-x,o.hy-y) < (o.r+r)*.95)) continue;
+    const o = { type, r, hx:x, hy:y, x, y, vx:0, vy:0, rot:rand(0,7), vr:0, spin:rand(-.0012,.0012),
+                ph:rand(0,99), col:Math.floor(rand(0,3)), wander:rand(28,60), fs:rand(.7,1.4) };
+    if (type !== 'lotus') Object.assign(o, makePad(r));
+    if (type === 'padLotus'){ o.lr = r*rand(.42,.55); o.lox = rand(-.25,.25)*r; o.loy = rand(-.25,.25)*r; }
+    if (type === 'lotus'){ o.lr = r; o.count = Math.random()<.35 ? 3 : 1; }
+    objs.push(o);
+  }
+}
+
+function resize(){
+  DPR = Math.min(devicePixelRatio||1, 2); W = innerWidth; H = innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); bgGrad = null; layout();
+}
+
+function addRipple(x,y,max,strength,delay=0){ ripples.push({x,y,r:0,max,str:strength,delay,pushed:new Set()}); }
+
+/* input */
+addEventListener('pointermove', e=>{
+  if (e.pointerType==='touch') return;
+  mouse.x = e.clientX; mouse.y = e.clientY + scrollY; if (mouse.y < H) mouse.last = performance.now();
+  dot.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-50%)`;
+}, {passive:true});
+addEventListener('touchmove', e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY+scrollY; mouse.last=performance.now(); }, {passive:true});
+addEventListener('touchstart', e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY+scrollY; mouse.last=performance.now(); }, {passive:true});
+addEventListener('pointerdown', e=>{
+  if (pm.classList.contains('open')) return;
+  const py = e.clientY + scrollY; if (py > H) return;
+  addRipple(e.clientX,py,220,1); addRipple(e.clientX,py,160,.6,9); addRipple(e.clientX,py,110,.35,18);
+});
+const dot = document.getElementById('dot');
+document.addEventListener('pointerover', e=>{ dot.classList.toggle('hover', !!e.target.closest('a,button,.card')); });
+document.addEventListener('mouseleave', ()=>dot.style.opacity=0);
+document.addEventListener('mouseenter', ()=>dot.style.opacity=1);
+let lastW = innerWidth; addEventListener('resize', ()=>{ if (innerWidth !== lastW || Math.abs(innerHeight - H) > 120){ lastW = innerWidth; resize(); } });
+
+/* drawing */
+function drawLotus(r, t, ph, th, layersOnly){
+  const br = 1 + .035*Math.sin(t*.0011+ph);
+  const L = [[8,1,.36,0,th.petals[0]],[8,.86,.34,Math.PI/8,th.petals[1]],[6,.56,.3,0,th.petals[2]]];
+  for (const [n,len,w,off,c] of L){
+    if (layersOnly && len===1) continue;
+    ctx.fillStyle = c;
+    for (let i=0;i<n;i++){
+      ctx.save(); ctx.rotate(off + i*Math.PI*2/n + Math.sin(t*.0007+ph+i)*.02);
+      ctx.scale(r*len*br, r*w); ctx.fill(PETAL); ctx.restore();
+    }
+  }
+  ctx.fillStyle = th.core; ctx.beginPath(); ctx.arc(0,0,r*.17,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  for (let i=0;i<7;i++){ const a=i*Math.PI*2/7; ctx.beginPath(); ctx.arc(Math.cos(a)*r*.09,Math.sin(a)*r*.09,r*.022,0,7); ctx.fill(); }
+}
+
+function drawPad(o, th){
+  ctx.fillStyle = th.pads[o.col]; ctx.fill(o.path);
+  ctx.strokeStyle = th.vein; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (const a of o.veins){ const c=Math.cos(a), s=Math.sin(a);
+    ctx.moveTo(c*o.r*.8, s*o.r*.8); ctx.lineTo(c*o.r*.96, s*o.r*.96); }
+  ctx.stroke();
+  ctx.fillStyle = th.padCore; ctx.beginPath(); ctx.arc(o.r*.12, 0, o.r*.1, 0, 7); ctx.fill();
+}
+
+function drawBoat(th, t){
+  const L = 38, w = 17;
+  ctx.save(); ctx.translate(boat.x, boat.y); ctx.rotate(boat.a + Math.sin(t*.002)*.04);
+  const hull = new Path2D(`M${L/2} 0 L${L*.18} ${w/2} L${-L/2} ${w*.42} L${-L/2} ${-w*.42} L${L*.18} ${-w/2} Z`);
+  ctx.save(); ctx.translate(3,5); ctx.fillStyle = th.shadow; ctx.fill(hull); ctx.restore();
+  ctx.fillStyle = th.boat; ctx.fill(hull);
+  ctx.fillStyle = th.boatShade;
+  ctx.beginPath(); ctx.moveTo(L*.22,0); ctx.lineTo(-L*.12,-w*.34); ctx.lineTo(-L*.42,0); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = th.boatShade; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L*.22,0); ctx.lineTo(-L*.12,w*.34); ctx.lineTo(-L*.42,0); ctx.stroke();
+  ctx.restore();
+}
+
+let lastT = performance.now(), rainT = 0;
+function frame(t){
+  if (scrollY > H){ lastT = t; requestAnimationFrame(frame); return; }
+  const dt = Math.min(2.5, (t-lastT)/16.67); lastT = t;
+  const th = THEMES[themeName];
+
+  /* water */
+  if (!bgGrad){ bgGrad = ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.5,Math.hypot(W,H)*.6);
+    bgGrad.addColorStop(0,th.bg0); bgGrad.addColorStop(1,th.bg1); }
+  ctx.fillStyle = bgGrad; ctx.fillRect(0,0,W,H);
+  // soft topographic water lines
+  ctx.strokeStyle = th.line; ctx.lineWidth = 1;
+  for (let k=0;k<9;k++){
+    const y0 = H*(k+.5)/9; ctx.beginPath();
+    for (let x=-20;x<=W+20;x+=24){
+      const y = y0 + Math.sin(x*.004 + k*1.7 + t*.00012)*22 + Math.sin(x*.011 - k + t*.0002)*8;
+      x<0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  /* boat follows the cursor softly (autopilot when idle / touch) */
+  let tx = mouse.x, ty = mouse.y;
+  if (t - mouse.last > 5000){
+    tx = W*.5 + Math.cos(t*.00016)*W*.34; ty = H*.5 + Math.sin(t*.00023)*H*.3;
+  }
+  const ease = reduced ? .02 : .035;
+  const nvx = (tx-boat.x)*ease, nvy = (ty-boat.y)*ease;
+  boat.vx += (nvx-boat.vx)*.12*dt; boat.vy += (nvy-boat.vy)*.12*dt;
+  boat.x += boat.vx*dt; boat.y += boat.vy*dt;
+  const sp = Math.hypot(boat.vx, boat.vy);
+  if (sp > .15){ let da = Math.atan2(boat.vy,boat.vx) - boat.a;
+    da = Math.atan2(Math.sin(da),Math.cos(da)); boat.a += da*Math.min(1,.06*dt*Math.min(1,sp)); }
+  // wake
+  const sx = boat.x - Math.cos(boat.a)*18, sy = boat.y - Math.sin(boat.a)*18;
+  trail.unshift({x:sx, y:sy, a:boat.a, s:sp});
+  if (trail.length > 60) trail.pop();
+  boat.dist += sp*dt;
+  if (boat.dist > 46 && sp > .6){ boat.dist = 0; addRipple(sx, sy, 50+sp*6, 0); }
+
+  /* rain-drop ripples, like gold rings on the pond */
+  rainT -= dt;
+  if (rainT <= 0 && !reduced){ rainT = rand(70,160); const x=rand(0,W), y=rand(0,H);
+    addRipple(x,y,rand(60,130),0); addRipple(x,y,rand(30,60),0,14); }
+
+  /* physics */
+  for (const o of objs){
+    const hx = o.hx + Math.sin(t*.00011*o.fs+o.ph)*o.wander + Math.sin(t*.00029+o.ph*2)*10,
+          hy = o.hy + Math.cos(t*.00009*o.fs+o.ph*1.3)*o.wander*.8 + Math.cos(t*.00023+o.ph)*9;
+    o.vx += (hx-o.x)*.0012*dt; o.vy += (hy-o.y)*.0012*dt;
+    o.vr += Math.sin(t*.00013+o.ph)*.000012*dt;
+    const dx = o.x-boat.x, dy = o.y-boat.y, d = Math.hypot(dx,dy)||1, R = o.r + 60;
+    if (d < R){
+      const f = 1 - d/R, push = f*f*(.35 + sp*.18)*dt;
+      o.vx += dx/d*push + boat.vx*f*.02*dt; o.vy += dy/d*push + boat.vy*f*.02*dt;
+      o.vr += ((boat.vx*dy - boat.vy*dx)/(d*R)) * f * .004 * dt;
+    }
+  }
+  for (let i=0;i<objs.length;i++) for (let j=i+1;j<objs.length;j++){
+    const a=objs[i], b=objs[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1, min=(a.r+b.r)*.88;
+    if (d<min){ const f=(min-d)/min*.12*dt; a.vx-=dx/d*f; a.vy-=dy/d*f; b.vx+=dx/d*f; b.vy+=dy/d*f; }
+  }
+  for (const o of objs){
+    const damp = Math.pow(.955, dt);
+    o.vx *= damp; o.vy *= damp; o.vr *= Math.pow(.97,dt);
+    o.x += o.vx*dt; o.y += o.vy*dt; o.rot += (o.spin + o.vr)*dt;
+  }
+
+  /* ripples */
+  for (let i=ripples.length-1;i>=0;i--){
+    const r = ripples[i];
+    if (r.delay > 0){ r.delay -= dt; continue; }
+    r.r += (r.str ? 2.4 : 1.1)*dt;
+    const life = 1 - r.r/r.max;
+    if (life <= 0){ ripples.splice(i,1); continue; }
+    if (r.str){ for (const o of objs){ if (r.pushed.has(o)) continue;
+      const dx=o.x-r.x, dy=o.y-r.y, d=Math.hypot(dx,dy)||1;
+      if (Math.abs(d - r.r) < o.r*.6){ r.pushed.add(o); const f = r.str*2.2*life; o.vx+=dx/d*f; o.vy+=dy/d*f; o.vr += rand(-.004,.004)*r.str; } } }
+    const c = r.str ? th.ripple : (r.max > 80 ? th.ripple : th.wake);
+    ctx.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(r.str? .55 : .32)*life})`;
+    ctx.lineWidth = r.str ? 1.4 : 1;
+    ctx.beginPath(); ctx.arc(r.x,r.y,r.r,0,Math.PI*2); ctx.stroke();
+  }
+
+  /* V-shaped wake */
+  if (trail.length > 3){
+    const wc = th.wake;
+    for (const side of [-1,1]){
+      ctx.beginPath();
+      trail.forEach((p,i)=>{ const spread = i*.9*Math.min(1,p.s*.6);
+        const x = p.x + Math.cos(p.a+Math.PI/2*side)*spread, y = p.y + Math.sin(p.a+Math.PI/2*side)*spread;
+        i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
+      const g = ctx.createLinearGradient(trail[0].x,trail[0].y,trail[trail.length-1].x,trail[trail.length-1].y);
+      g.addColorStop(0,`rgba(${wc[0]},${wc[1]},${wc[2]},${Math.min(.45,sp*.12)})`);
+      g.addColorStop(1,`rgba(${wc[0]},${wc[1]},${wc[2]},0)`);
+      ctx.strokeStyle = g; ctx.lineWidth = 1.2; ctx.stroke();
+    }
+  }
+
+  /* shadows, then pads, then flowers */
+  ctx.fillStyle = th.shadow;
+  for (const o of objs){ if (o.type==='lotus') continue;
+    ctx.save(); ctx.translate(o.x+4, o.y+7); ctx.rotate(o.rot); ctx.fill(o.path); ctx.restore(); }
+  for (const o of objs){ if (o.type==='lotus') continue;
+    const bob = 1 + .012*Math.sin(t*.0013+o.ph);
+    ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot); ctx.scale(bob,bob); drawPad(o, th); ctx.restore(); }
+  for (const o of objs){
+    if (o.type==='pad') continue;
+    ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot*1.3);
+    if (o.type==='padLotus'){ ctx.translate(o.lox,o.loy); drawLotus(o.lr, t, o.ph, th); }
+    else if (o.count===3){
+      [[0,0,1],[o.lr*1.35,o.lr*.5,.75],[o.lr*.45,o.lr*1.4,.6]].forEach(([x,y,s],k)=>{
+        ctx.save(); ctx.translate(x,y); drawLotus(o.lr*s, t, o.ph+k, th); ctx.restore(); });
+    } else drawLotus(o.lr, t, o.ph, th);
+    ctx.restore();
+  }
+
+  drawBoat(th, t);
+
+  requestAnimationFrame(frame);
+}
+resize();
+requestAnimationFrame(frame);
+
+/* ===================== FOOTER SHORE: side-view lotus on water ===================== */
+(function(){
+  const cv = document.getElementById('shore'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const SP = 6;                       // px per water column
+  const SHORE = {
+    dark:  { top:'#16404a', bot:'#0a1d24', line:'rgba(220,240,240,.28)', glint:'rgba(230,203,130,.5)',
+             padA:'#3f7d52', padB:'#7cc48e', petalA:'rgba(214,74,134,.82)', petalB:'rgba(255,196,220,.78)', stem:'#5fae7a', budG:'#4caf62' },
+    light: { top:'#d5e6dc', bot:'#f6f2eb', line:'rgba(255,255,255,.9)', glint:'rgba(255,255,255,.9)',
+             padA:'#9fae7b', padB:'#b9d98e', petalA:'rgba(226,68,145,.72)', petalB:'rgba(250,190,214,.75)', stem:'#8cc06c', budG:'#8cc06c' }
+  };
+  let W=0, H=0, N=0, hs, vs, items=[], seaY=0, visible=false, lastX=null;
+  const rand = (a,b)=>a+Math.random()*(b-a);
+
+  function size(){
+    const d = Math.min(devicePixelRatio||1, 2);
+    W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
+    cv.width = W*d; cv.height = H*d; ctx.setTransform(d,0,0,d,0,0);
+    N = Math.ceil(W/SP)+2; hs = new Float32Array(N); vs = new Float32Array(N);
+    seaY = H*.5; items = [];
+    const n = Math.max(4, Math.round(W/170)), kinds = ['lotus','pad','bud','lotus','pad','smallLotus','bud'];
+    for (let i=0;i<n;i++){
+      const kind = kinds[i % kinds.length];
+      items.push({ kind, x:(i+.5)/n*W + rand(-30,30), drift:rand(-.06,.06), ph:rand(0,9),
+        s: kind==='smallLotus' ? rand(.55,.7) : rand(.85,1.15) * Math.min(1.2, Math.max(.7, W/1300)),
+        stemH: rand(50,90), lean: rand(-.35,.35) });
+    }
+  }
+  const surf = (x,t)=> seaY + Math.sin(x*.011 + t*.0011)*4 + Math.sin(x*.027 - t*.0017)*2
+                      + (hs ? hs[Math.max(0, Math.min(N-1, Math.round(x/SP)))] : 0);
+
+  function petal(L, w){ // pointing up from (0,0)
+    ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.bezierCurveTo(w, -L*.3, w*.8, -L*.75, 0, -L);
+    ctx.bezierCurveTo(-w*.8, -L*.75, -w, -L*.3, 0, 0); ctx.closePath();
+  }
+  function lotus(c, s, t, ph){
+    const open = 1 + Math.sin(t*.0012+ph)*.04;
+    const P = [[-78,.62],[78,.62],[-52,.82],[52,.82],[-26,.96],[26,.96],[0,1.05]];
+    for (const [deg, len] of P){
+      const L = 76*s*len, a = deg*Math.PI/180*open;
+      ctx.save(); ctx.rotate(a);
+      const g = ctx.createLinearGradient(0,0,0,-L); g.addColorStop(0,c.petalA); g.addColorStop(1,c.petalB);
+      ctx.fillStyle = g; petal(L, L*.34); ctx.fill(); ctx.restore();
+    }
+  }
+  function pad(c, s){
+    const g = ctx.createLinearGradient(-60*s,0,60*s,0); g.addColorStop(0,c.padA); g.addColorStop(1,c.padB);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(0,0,64*s,10*s,0,0,Math.PI*2); ctx.fill();
+  }
+  function bud(c, it, t){
+    const sway = Math.sin(t*.0009+it.ph)*.08 + it.lean, h = it.stemH*it.s;
+    const tx = Math.sin(sway)*h, ty = -Math.cos(sway)*h;
+    ctx.strokeStyle = c.stem; ctx.lineWidth = 3*it.s; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(0,4); ctx.quadraticCurveTo(tx*.1 + 14*it.s, ty*.5, tx, ty); ctx.stroke();
+    ctx.save(); ctx.translate(tx,ty); ctx.rotate(sway); const r = 16*it.s;
+    ctx.fillStyle = c.petalB; ctx.beginPath(); ctx.moveTo(0,-r*1.9);
+    ctx.bezierCurveTo(r*1.2,-r*1.1, r*1.1,r*.3, 0,r*.4); ctx.bezierCurveTo(-r*1.1,r*.3, -r*1.2,-r*1.1, 0,-r*1.9); ctx.fill();
+    ctx.fillStyle = c.petalA; ctx.beginPath(); ctx.moveTo(0,-r*1.9); ctx.bezierCurveTo(r*.9,-r*1.1, r*.7,0, 0,r*.4); ctx.fill();
+    ctx.fillStyle = c.budG; ctx.beginPath(); ctx.moveTo(-r*1.05,-r*.3);
+    ctx.quadraticCurveTo(-r*.5,-r*.9, 0,-r*.35); ctx.quadraticCurveTo(r*.5,-r*.9, r*1.05,-r*.3);
+    ctx.bezierCurveTo(r*.9,r*.5, -r*.9,r*.5, -r*1.05,-r*.3); ctx.fill();
+    ctx.restore();
+  }
+  function drawItems(c, t){
+    for (const it of items){
+      const y = surf(it.x,t), slope = (surf(it.x+8,t) - surf(it.x-8,t))/16;
+      ctx.save(); ctx.translate(it.x, y); ctx.rotate(Math.atan(slope)*.9);
+      if (it.kind==='pad') pad(c, it.s*1.1);
+      else if (it.kind==='bud') { bud(c, it, t); pad(c, it.s*.6); }
+      else { pad(c, it.s); ctx.translate(0, -3*it.s); lotus(c, it.s, t, it.ph); }
+      ctx.restore();
+    }
+  }
+  function water(c, t, offset, alpha){
+    ctx.beginPath(); ctx.moveTo(0,H);
+    for (let x=0; x<=W+SP; x+=SP) ctx.lineTo(x, surf(x,t)+offset);
+    ctx.lineTo(W,H); ctx.closePath();
+    const g = ctx.createLinearGradient(0,seaY,0,H); g.addColorStop(0,c.top); g.addColorStop(1,c.bot);
+    ctx.globalAlpha = alpha; ctx.fillStyle = g; ctx.fill(); ctx.globalAlpha = 1;
+  }
+
+  addEventListener('pointermove', e=>{
+    if (!visible || !hs) return;
+    const b = cv.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top;
+    if (y < 0 || y > H || x < 0 || x > W){ lastX = null; return; }
+    if (lastX !== null){ const sp = Math.min(30, Math.abs(x-lastX)); const i = Math.round(x/SP);
+      for (let k=-2;k<=2;k++) if (hs[i+k] !== undefined) vs[i+k] += sp*.09*(1-Math.abs(k)/3); }
+    lastX = x;
+  }, {passive:true});
+  cv.addEventListener('pointerdown', e=>{
+    const b = cv.getBoundingClientRect(), i = Math.round((e.clientX-b.left)/SP);
+    for (let k=-4;k<=4;k++) if (hs[i+k] !== undefined) vs[i+k] += 9*(1-Math.abs(k)/5);
+  });
+  new IntersectionObserver(es=>{ visible = es[0].isIntersecting; }).observe(cv);
+  addEventListener('resize', ()=>{ if (cv.clientWidth !== W) size(); });
+
+  let last = performance.now();
+  function frame(t){
+    requestAnimationFrame(frame);
+    if (!visible) { last = t; return; }
+    if (!W || cv.clientWidth !== W) size(); if (!W) return;
+    const dt = Math.min(2.5, (t-last)/16.67); last = t;
+    const c = SHORE[themeName] || SHORE.dark;
+    // spring water
+    for (let i=0;i<N;i++){ vs[i] += -hs[i]*.025*dt; vs[i] *= Math.pow(.982,dt); hs[i] += vs[i]*dt; }
+    for (let p=0;p<3;p++) for (let i=1;i<N-1;i++){ const d = (hs[i-1]+hs[i+1]-2*hs[i])*.12; vs[i] += d; }
+    // slow drift along the water, wrapping round
+    for (const it of items){ if (!reduced) it.x += it.drift*dt; if (it.x < -80) it.x = W+80; if (it.x > W+80) it.x = -80; }
+
+    ctx.clearRect(0,0,W,H);
+    water(c, t, 0, 1);
+    // reflections
+    ctx.save(); ctx.beginPath(); ctx.rect(0, seaY-6, W, H); ctx.clip();
+    ctx.globalAlpha = .16; ctx.translate(0, seaY*2); ctx.scale(1,-1); drawItems(c, t); ctx.restore();
+    ctx.globalAlpha = 1;
+    drawItems(c, t);
+    water(c, t + 900, 9, .55);   // a nearer, translucent swell overlapping the pads
+    // surface highlight + glints
+    ctx.strokeStyle = c.line; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x=0; x<=W+SP; x+=SP){ const y = surf(x,t); x ? ctx.lineTo(x,y) : ctx.moveTo(x,y); } ctx.stroke();
+    ctx.strokeStyle = c.glint; ctx.lineWidth = 1;
+    for (let k=0;k<7;k++){ const gx = (k*W/7 + t*.01*(k%2?1:-1)) % W, gy = seaY + 26 + k%3*18, gw = 14 + (k%4)*8;
+      ctx.globalAlpha = .25 + .2*Math.sin(t*.002 + k); ctx.beginPath(); ctx.moveTo((gx+W)%W, gy); ctx.lineTo((gx+W)%W + gw, gy); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
