@@ -138,8 +138,32 @@
   .pm-facts{display:flex;gap:32px;flex-wrap:wrap;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
   .pm-facts b{display:block;font-weight:400;color:var(--ink);letter-spacing:.04em;text-transform:none;font-size:15px;margin-top:6px}
   .pm-desc{max-width:680px;font-size:17px;line-height:1.75;margin-bottom:48px;white-space:pre-line}
-  .pm-imgs{display:flex;flex-direction:column;gap:clamp(14px,2vw,24px)}
-  .pm-imgs img{width:100%;height:auto;border-radius:8px;background:var(--glass)}
+  /* images flow in rows of 2–3, each keeping its own shape (wide pieces take more room) */
+  .pm-imgs{--row:clamp(180px,20vw,280px);--gap:clamp(12px,1.6vw,20px);display:flex;flex-wrap:wrap;gap:var(--gap)}
+  .pm-imgs::after{content:"";flex-grow:999}
+  .pm-item{--r:1;position:relative;flex:var(--r) 1 calc(var(--r) * var(--row));aspect-ratio:var(--r);max-height:calc(var(--row) * 1.6);
+           border:none;padding:0;margin:0;background:var(--glass);border-radius:8px;overflow:hidden;cursor:zoom-in;
+           opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1),box-shadow .5s}
+  .pm-item.in{opacity:1;transform:none}
+  .pm-item.in:hover{transform:translateY(-6px);box-shadow:0 24px 50px -24px rgba(0,0,0,.6)}
+  .pm-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+  .pm-item:hover img{transform:scale(1.03)}
+  .pm-item:nth-child(3n+2).in{animation:bob 7s ease-in-out infinite}
+  .pm-item:nth-child(3n).in{animation:bob 8.5s ease-in-out -3s infinite}
+  @keyframes bob{50%{translate:0 -4px}}
+  @media (max-width:560px){ .pm-imgs{--row:140px} }
+  /* enlarged image */
+  .zoom{position:fixed;inset:0;z-index:160;display:flex;align-items:center;justify-content:center;padding:clamp(16px,4vw,48px);
+        background:rgba(6,16,20,.92);opacity:0;pointer-events:none;transition:opacity .35s;cursor:zoom-out}
+  .zoom.open{opacity:1;pointer-events:auto}
+  .zoom img{max-width:100%;max-height:100%;border-radius:6px;box-shadow:0 40px 100px -30px #000;transform:scale(.97);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+  .zoom.open img{transform:none}
+  .zoom button{position:absolute;top:50%;transform:translateY(-50%);min-width:48px;min-height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.25);
+               background:rgba(10,29,36,.6);color:#fff;font-size:20px;cursor:pointer}
+  .zoom button:hover{border-color:var(--accent);color:var(--accent)}
+  .zoom .zp{left:16px}.zoom .zn{right:16px}
+  .zoom .zx{top:16px;right:16px;transform:none;font-size:14px}
+  @media (prefers-reduced-motion:reduce){ .pm-item, .pm-item.in{animation:none;transition:none;opacity:1;transform:none} }
   .pm-empty{padding:60px 20px;border:1px dashed var(--line);border-radius:8px;text-align:center;color:var(--muted)}
   .pm-nav{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:28px;border-top:1px solid var(--line)}
   .pm-nav button{background:none;border:none;color:var(--ink);font:inherit;text-align:left;min-height:44px;padding:0;opacity:.75;transition:opacity .3s,color .3s}
@@ -238,6 +262,12 @@
 <div class="shore" aria-hidden="true"><canvas id="shore"></canvas></div>
 <footer>© <span id="yr"></span> Your Name — made on still water</footer>
 
+<div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-label="Enlarged image">
+  <img id="zoomImg" alt="">
+  <button class="zp" id="zoomPrev" type="button" aria-label="Previous image">←</button>
+  <button class="zn" id="zoomNext" type="button" aria-label="Next image">→</button>
+  <button class="zx" id="zoomClose" type="button" aria-label="Close enlarged image">✕</button>
+</div>
 <div class="pm" id="pm" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
   <div class="pm-box">
     <button class="pm-close" id="pmClose" type="button">Close ✕</button>
@@ -354,7 +384,17 @@ function openProject(i, from){
   document.getElementById('pmCats').textContent = (p.cats||[]).join(', ') || '—';
   document.getElementById('pmDesc').textContent = p.desc || '';
   const box = document.getElementById('pmImgs'); box.textContent = '';
-  (p.images||[]).forEach((src, k) => { const img = el('img'); img.alt = `${p.title} — image ${k+1}`; img.loading = k < 2 ? 'eager' : 'lazy'; img.src = src; box.append(img); });
+  const imgs = p.images || [];
+  imgs.forEach((src, k) => {
+    const item = el('button','pm-item'); item.type = 'button';
+    item.setAttribute('aria-label', `Enlarge ${p.title} image ${k+1} of ${imgs.length}`);
+    const img = el('img'); img.alt = `${p.title} — image ${k+1}`; img.loading = k < 4 ? 'eager' : 'lazy'; img.decoding = 'async';
+    const show = () => { if (img.naturalWidth) item.style.setProperty('--r', (img.naturalWidth / img.naturalHeight).toFixed(3)); setTimeout(()=>item.classList.add('in'), 40 + (k%6)*70); };
+    img.onload = show; img.onerror = () => item.classList.add('in');
+    img.src = src; if (img.complete && img.naturalWidth) show();
+    item.onclick = () => openZoom(imgs, k, p.title);
+    item.append(img); box.append(item);
+  });
   if (!(p.images||[]).length) box.append(el('div','pm-empty','Images coming soon.'));
   const list = shown().length ? shown() : PROJECTS, k = list.indexOf(p);
   const prev = list[(k-1+list.length)%list.length], next = list[(k+1)%list.length];
@@ -364,10 +404,25 @@ function openProject(i, from){
   pm.scrollTop = 0; pm.classList.add('open'); document.body.classList.add('locked');
   document.getElementById('pmClose').focus({preventScroll:true});
 }
+/* enlarged image viewer */
+const zoom = document.getElementById('zoom'), zoomImg = document.getElementById('zoomImg'); let zList = [], zIdx = 0, zTitle = '';
+function openZoom(list, k, title){ zList = list; zTitle = title; showZoom(k); zoom.classList.add('open'); document.getElementById('zoomClose').focus({preventScroll:true}); }
+function showZoom(k){ zIdx = (k + zList.length) % zList.length; zoomImg.src = zList[zIdx]; zoomImg.alt = `${zTitle} — image ${zIdx+1}`;
+  const many = zList.length > 1; document.getElementById('zoomPrev').hidden = !many; document.getElementById('zoomNext').hidden = !many; }
+function closeZoom(){ zoom.classList.remove('open'); const b = document.querySelectorAll('#pmImgs .pm-item')[zIdx]; if (b) b.focus({preventScroll:true}); }
+zoom.addEventListener('click', e => { if (e.target === zoom || e.target === zoomImg) closeZoom(); });
+document.getElementById('zoomClose').onclick = closeZoom;
+document.getElementById('zoomPrev').onclick = e => { e.stopPropagation(); showZoom(zIdx - 1); };
+document.getElementById('zoomNext').onclick = e => { e.stopPropagation(); showZoom(zIdx + 1); };
 function closeProject(){ pm.classList.remove('open'); document.body.classList.remove('locked'); pmIdx = -1; if (pmReturn) pmReturn.focus({preventScroll:true}); }
 document.getElementById('pmClose').onclick = closeProject;
 pm.addEventListener('click', e => { if (e.target === pm) closeProject(); });
 addEventListener('keydown', e => {
+  if (zoom.classList.contains('open')){
+    if (e.key==='Escape') closeZoom(); if (e.key==='ArrowRight') showZoom(zIdx+1); if (e.key==='ArrowLeft') showZoom(zIdx-1);
+    if (e.key==='Tab'){ const f=[...zoom.querySelectorAll('button:not([hidden])')]; const i=f.indexOf(document.activeElement); e.preventDefault(); f[(i + (e.shiftKey?-1:1) + f.length) % f.length].focus(); }
+    return;
+  }
   if (!pm.classList.contains('open')) return;
   if (e.key==='Escape') closeProject();
   if (e.key==='ArrowRight') document.getElementById('pmNext').click();
