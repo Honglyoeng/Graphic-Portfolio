@@ -118,6 +118,7 @@
   .socials a{opacity:.7;transition:opacity .3s}.socials a:hover{opacity:1;color:var(--accent)}
   .shore{position:relative;height:clamp(220px,26vw,340px);margin-top:-20px}
   .shore canvas{display:block;width:100%;height:100%}
+  footer .credit{margin-top:10px;font-size:11px;letter-spacing:.06em;opacity:.75}
   footer{text-align:center;padding:8px 16px 40px;font-size:12px;color:var(--muted);letter-spacing:.08em}
 
   /* project pop-up */
@@ -297,7 +298,9 @@
 </main>
 
 <div class="shore" aria-hidden="true"><canvas id="shore"></canvas></div>
-<footer>© <span id="yr"></span> <span data-site="name">Hongly Oeng</span> — <span data-site="footer">made on still water</span></footer>
+<footer>© <span id="yr"></span> <span data-site="name">Hongly Oeng</span> — <span data-site="footer">made on still water</span>
+  <div class="credit" data-site="credit">Designed &amp; vibe coded by Hongly, with two cups of cappuccino and Claude ♥</div>
+</footer>
 
 <div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-label="Enlarged image">
   <img id="zoomImg" alt="">

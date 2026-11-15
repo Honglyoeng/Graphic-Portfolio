@@ -208,7 +208,8 @@ const SITE_DEFAULTS = {
   contactLine: "Let's make something calm",
   email: 'Honglyoeng@gmail.com',
   socials: [{label:'Instagram', url:'https://www.instagram.com/justyves_24/'}, {label:'LinkedIn', url:'https://www.linkedin.com/in/oeng-hongly-527ba7176/'}],
-  footer: 'made on still water'
+  footer: 'made on still water',
+  credit: 'Designed & vibe coded by Hongly, with two cups of cappuccino and Claude ♥'
 };
 let mode = 'local', uploadMode = 'token', blobClient = null;   // 'local' = server.py on this computer, 'online' = Vercel
 const view = src => /^https?:\/\//.test(src) ? src : '/' + src;
@@ -342,7 +343,8 @@ function renderSiteEditor(ed){
       field('s-about','About paragraph', area('s-about','about', 5), 'Put *stars* around words to make them pink. Press Enter for a new line.'),
       field('s-contact','Contact — small line', text('s-contact','contactLine'), null, false),
       field('s-email','Email', text('s-email','email','you@example.com'), 'Leave empty to hide it.', false),
-      field('s-footer','Footer line', text('s-footer','footer'), 'Shown after “© year Your name —”.')
+      field('s-footer','Footer line', text('s-footer','footer'), 'Shown after “© year Your name —”.'),
+      field('s-credit','Credit line', text('s-credit','credit'), 'The small line at the very bottom.')
     ])
   ]));
 
