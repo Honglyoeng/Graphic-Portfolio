@@ -14,6 +14,7 @@
     --line:rgba(244,235,238,.12); --danger:#ff8a8a; --ok:#8fd6a4;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none !important}
   body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-weight:300;min-height:100vh}
   button,input,textarea{font:inherit;color:inherit}
   button{cursor:pointer}
@@ -59,6 +60,11 @@
   .icon:hover{background:rgba(255,255,255,.06);color:var(--ink)}
   .icon:disabled{opacity:.25;pointer-events:none}
   .icon svg{width:16px;height:16px}
+  .site-btn{width:100%;background:none;border:1px solid var(--line);text-align:left;color:inherit;margin-bottom:18px}
+  .site-btn .thumb{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:20px;color:var(--accent)}
+  .hint{font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:300}
+  .soc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto;gap:8px;align-items:center}
+  .soc + .soc{margin-top:8px}
   .side .btn{width:100%;justify-content:center;margin-top:12px}
 
   /* editor */
@@ -166,6 +172,7 @@
 
 <div class="wrap">
   <aside class="side" aria-label="Projects">
+    <button class="pitem site-btn" id="siteBtn" type="button"><div class="thumb">Aa</div><div class="meta"><div class="t">Site text</div><div class="s">Name, intro, about, contact</div></div></button>
     <h2>Projects</h2>
     <ul class="plist" id="plist"></ul>
     <button class="btn" id="addProject" type="button">+ New project</button>
@@ -191,7 +198,18 @@ const ICON = {
   upload:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 31V11M16 18l8-8 8 8"/><path d="M8 30v6a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4v-6"/></svg>'
 };
 
-let data = { projects: [] }, sel = 0, serverOK = true;
+let data = { projects: [] }, sel = 0, serverOK = true;   // sel: project index, or 'site'
+const SITE_DEFAULTS = {
+  name: 'Hongly Oeng',
+  heroLine: 'Graphic design · Branding · UI design',
+  heroText: 'Quiet visuals, grown slowly — like lotus on still water.',
+  workTitle: 'Food-related *work*',
+  about: "I'm a graphic designer drawn to *calm, organic forms* — the lotus, still water, the space between things. I work across graphic design, branding and UI — campaigns, identities and interfaces that feel unhurried and intentional.",
+  contactLine: "Let's make something calm",
+  email: 'Honglyoeng@gmail.com',
+  socials: [{label:'Instagram', url:'https://www.instagram.com/justyves_24/'}, {label:'LinkedIn', url:'https://www.linkedin.com/in/oeng-hongly-527ba7176/'}],
+  footer: 'made on still water'
+};
 let mode = 'local', uploadMode = 'token', blobClient = null;   // 'local' = server.py on this computer, 'online' = Vercel
 const view = src => /^https?:\/\//.test(src) ? src : '/' + src;
 const BLOB_CLIENT = 'https://cdn.jsdelivr.net/npm/@vercel/blob@2.9.0/client/+esm';
@@ -220,6 +238,7 @@ async function load(){
   if (mode === 'online'){ try { const r = await fetch('/api/projects?t=' + Date.now(), {cache:'no-store'}); if (r.ok) loaded = await r.json(); } catch(e){} }
   if (!loaded){ try { const r = await fetch('/projects.json', {cache:'no-store'}); if (r.ok) loaded = await r.json(); } catch(e){} }
   data = loaded && Array.isArray(loaded.projects) ? { ...loaded, projects: loaded.projects.map(normalize) } : { projects: [] };
+  data.site = { ...SITE_DEFAULTS, ...(data.site || {}) };
   renderList(); renderEditor();
   if (mode === 'local'){
     try { const r = await fetch('/api/ping', {method:'POST'}); serverOK = r.status !== 501 && r.status !== 405; }
@@ -269,7 +288,9 @@ async function deleteFile(src){
 window.addEventListener('beforeunload', e => { if ($('#status').classList.contains('saving')) { e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- project list ---------- */
+$('#siteBtn').onclick = () => { sel = 'site'; renderList(); renderEditor(); };
 function renderList(){
+  $('#siteBtn').classList.toggle('on', sel === 'site');
   const ul = $('#plist'); ul.textContent = '';
   data.projects.forEach((p, i) => {
     const thumb = el('div', {className:'thumb'});
@@ -302,8 +323,54 @@ $('#addProject').onclick = () => {
 };
 
 /* ---------- editor ---------- */
+function renderSiteEditor(ed){
+  const st = data.site;
+  const field = (id, label, input, hint, wide = true) => {
+    const f = el('div',{className:'field' + (wide ? ' wide' : '')});
+    f.append(el('label',{htmlFor:id, textContent:label}), input); if (hint) f.append(el('div',{className:'hint', textContent:hint})); return f;
+  };
+  const text = (id, key, ph) => { const i = el('input',{type:'text', id, value: st[key] || '', placeholder: ph || ''}); i.oninput = () => { st[key] = i.value; scheduleSave(); }; return i; };
+  const area = (id, key, rows) => { const t = el('textarea',{id, value: st[key] || '', rows: rows || 4}); t.oninput = () => { st[key] = t.value; scheduleSave(); }; return t; };
+
+  ed.append(el('div',{className:'card'},[
+    el('div',{className:'head'},[el('div',{className:'lbl', textContent:'Site text'}), el('p',{textContent:'Saves by itself · shows on the site within a few seconds'})]),
+    el('div',{className:'fields'},[
+      field('s-name','Your name', text('s-name','name'), 'Shown in the top-left logo, the big landing title, the browser tab and the footer.'),
+      field('s-hero1','Landing — small line', text('s-hero1','heroLine'), 'The small capitals above your name.', false),
+      field('s-hero2','Landing — sentence', text('s-hero2','heroText'), 'The line under your name.', false),
+      field('s-work','Work section title', text('s-work','workTitle'), 'Put *stars* around a word to make it pink, e.g. Food-related *work*.'),
+      field('s-about','About paragraph', area('s-about','about', 5), 'Put *stars* around words to make them pink. Press Enter for a new line.'),
+      field('s-contact','Contact — small line', text('s-contact','contactLine'), null, false),
+      field('s-email','Email', text('s-email','email','you@example.com'), 'Leave empty to hide it.', false),
+      field('s-footer','Footer line', text('s-footer','footer'), 'Shown after “© year Your name —”.')
+    ])
+  ]));
+
+  // social links
+  const list = el('div');
+  const draw = () => {
+    list.textContent = '';
+    st.socials.forEach((sc, i) => {
+      const lab = el('input',{type:'text', value: sc.label || '', placeholder:'Label (e.g. Instagram)'}); lab.setAttribute('aria-label','Link ' + (i+1) + ' label');
+      const url = el('input',{type:'text', value: sc.url || '', placeholder:'https://…'}); url.setAttribute('aria-label','Link ' + (i+1) + ' address');
+      lab.oninput = () => { sc.label = lab.value; scheduleSave(); };
+      url.oninput = () => { sc.url = url.value.trim(); url.style.borderColor = !sc.url || /^https?:\/\//i.test(sc.url) ? '' : 'var(--danger)'; scheduleSave(); };
+      const x = el('button',{className:'icon', type:'button', innerHTML: ICON.x}); x.setAttribute('aria-label','Remove link ' + (sc.label || i+1));
+      x.onclick = () => { st.socials.splice(i,1); draw(); scheduleSave(); };
+      list.append(el('div',{className:'soc'},[lab, url, x]));
+    });
+  };
+  draw();
+  const add = el('button',{className:'btn', type:'button', textContent:'+ Add link'}); add.style.marginTop = '12px';
+  add.onclick = () => { st.socials.push({label:'', url:''}); draw(); list.lastChild.querySelector('input').focus(); };
+  ed.append(el('div',{className:'card'},[
+    el('div',{className:'head'},[el('div',{className:'lbl', textContent:'Social links'}), el('p',{textContent:'Links without a full https:// address are hidden on the site'})]),
+    list, add
+  ]));
+}
 function renderEditor(){
   const ed = $('#editor'); ed.textContent = '';
+  if (sel === 'site'){ ed.textContent = ''; renderSiteEditor(ed); return; }
   const p = data.projects[sel];
   if (!p){ ed.append(el('div',{className:'card empty', textContent:'No projects yet — add one on the left.'})); return; }
 
@@ -438,7 +505,7 @@ function tile(p, src, i){
 
 /* ---------- uploading ---------- */
 const OK_TYPES = ['image/jpeg','image/png','image/webp','image/avif','image/gif'];
-$('#fileInput').onchange = e => { const p = data.projects[sel]; if (p) upload(p, [...e.target.files]); e.target.value = ''; };
+$('#fileInput').onchange = e => { const p = typeof sel === 'number' ? data.projects[sel] : null; if (p) upload(p, [...e.target.files]); e.target.value = ''; };
 
 async function upload(p, files){
   files = files.filter(f => f.type.startsWith('image/'));

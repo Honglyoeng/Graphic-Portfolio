@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your Name — Graphic Design</title>
+<title>Hongly Oeng — Graphic Design</title>
 <meta name="description" content="Portfolio of graphic design and visual work.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +18,7 @@
     --glass:rgba(246,242,235,.62); --line:rgba(42,40,40,.12);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none !important}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-weight:300;
        line-height:1.6;overflow-x:hidden;transition:background .6s,color .6s}
@@ -95,6 +96,10 @@
   .about{max-width:980px;margin:0 auto;text-align:center}
   .about .lead{font-family:"Cormorant Garamond",serif;font-size:clamp(26px,3.2vw,40px);line-height:1.25;font-weight:300}
   .about .lead em{color:var(--accent)}
+  .about .lead{white-space:pre-line}
+  /* hide the placeholder text until your saved site text arrives (max ~1.5 s) */
+  html.site-wait [data-site], html.site-wait #mail{opacity:0}
+  [data-site], #mail{transition:opacity .5s}
   .panel{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);
          border-radius:8px;padding:32px}
   .panel h3{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:400;margin-bottom:12px}
@@ -237,6 +242,7 @@
 </style>
 </head>
 <body>
+<script>document.documentElement.classList.add('site-wait'); setTimeout(()=>document.documentElement.classList.remove('site-wait'), 1500);</script>
 
 <canvas id="pond" aria-hidden="true"></canvas>
 <div class="dot" id="dot"></div>
@@ -249,7 +255,7 @@
       <path d="M26 13c-5 0-8.5 4-10 9 5 0 8.5-3.5 10-9Z" opacity=".7"/></g>
       <path d="M5 25.5c3.7 1.4 7.4 2 11 2s7.3-.6 11-2" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity=".6"/>
     </svg>
-    Your Name
+    <span data-site="name">Hongly Oeng</span>
   </a>
   <nav>
     <a href="#work">Work</a>
@@ -263,36 +269,35 @@
 
 <main id="top">
   <section class="hero">
-    <div class="eyebrow">Graphic design · Branding · UI design</div>
-    <h1>Your Name</h1>
-    <p>Quiet visuals, grown slowly — like lotus on still water.</p>
+    <div class="eyebrow" data-site="heroLine">Graphic design · Branding · UI design</div>
+    <h1 data-site="name">Hongly Oeng</h1>
+    <p data-site="heroText">Quiet visuals, grown slowly — like lotus on still water.</p>
     <div class="hint"><span id="hintText">click the water to ripple</span><i></i></div>
   </section>
 
   <section id="work" style="padding-top:0;padding-bottom:0">
-    <div class="work-head"><h2>Food-related <em class="serif">work</em></h2><span class="count" id="count"></span></div>
+    <div class="work-head"><h2 data-site="workTitle" data-rich>Food-related <em class="serif">work</em></h2><span class="count" id="count"></span></div>
     <div class="grid" id="grid"></div>
   </section>
 
   <section id="about">
     <div class="about">
-      <p class="lead">I'm a graphic designer drawn to <em>calm, organic forms</em> — the lotus, still water, the space between things. I work across graphic design, branding and UI — campaigns, identities and interfaces that feel unhurried and intentional.</p>
+      <p class="lead" data-site="about" data-rich>I'm a graphic designer drawn to <em>calm, organic forms</em> — the lotus, still water, the space between things. I work across graphic design, branding and UI — campaigns, identities and interfaces that feel unhurried and intentional.</p>
     </div>
   </section>
 
   <section id="contact" class="contact">
-    <div class="eyebrow">Let's make something calm</div>
-    <a class="mail" href="mailto:hello@yourname.com">hello@yourname.com</a>
-    <div class="socials">
-      <a href="#" target="_blank" rel="noopener">Instagram</a>
-      <a href="#" target="_blank" rel="noopener">Behance</a>
-      <a href="#" target="_blank" rel="noopener">Dribbble</a>
+    <div class="eyebrow" data-site="contactLine">Let's make something calm</div>
+    <a class="mail" id="mail" href="mailto:Honglyoeng@gmail.com">Honglyoeng@gmail.com</a>
+    <div class="socials" id="socials">
+      <a href="https://www.instagram.com/justyves_24/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/in/oeng-hongly-527ba7176/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </section>
 </main>
 
 <div class="shore" aria-hidden="true"><canvas id="shore"></canvas></div>
-<footer>© <span id="yr"></span> Your Name — made on still water</footer>
+<footer>© <span id="yr"></span> <span data-site="name">Hongly Oeng</span> — <span data-site="footer">made on still water</span></footer>
 
 <div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-label="Enlarged image">
   <img id="zoomImg" alt="">
@@ -402,11 +407,35 @@ const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.
 
 phoneMQ.addEventListener('change', () => { renderGrid(); if (pm.classList.contains('open')) openProject(pmIdx); });
 
+/* ===================== site text (edited in Backstage → Site text) ===================== */
+const esc = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rich = t => esc(t).replace(/\*([^*\n]+)\*/g, '<em>$1</em>');      // *words* → highlighted
+function applySite(site){
+  document.documentElement.classList.remove('site-wait');
+  if (!site || typeof site !== 'object') return;
+  document.querySelectorAll('[data-site]').forEach(n => {
+    const v = site[n.dataset.site]; if (typeof v !== 'string' || !v.trim()) return;
+    if (n.hasAttribute('data-rich')) n.innerHTML = rich(v.trim()); else n.textContent = v.trim();
+  });
+  if (site.name) document.title = site.name.trim() + ' — Graphic Design';
+  const mail = document.getElementById('mail');
+  if (typeof site.email === 'string'){
+    const e = site.email.trim(); mail.hidden = !e;
+    if (e){ mail.textContent = e; mail.href = 'mailto:' + e; }
+  }
+  if (Array.isArray(site.socials)){
+    const box = document.getElementById('socials'); box.textContent = '';
+    site.socials.filter(x => x && x.label && /^https?:\/\//i.test(x.url || '')).forEach(x => {
+      const a = document.createElement('a'); a.href = x.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = x.label; box.append(a);
+    });
+  }
+}
+
 // Online (Vercel) the saved projects come from /api/projects; locally that 404s and projects.json is used.
 fetch('/api/projects').then(r => r.ok ? r.json() : Promise.reject())
   .catch(() => fetch('projects.json', {cache:'no-store'}).then(r => r.ok ? r.json() : Promise.reject()))
-  .then(d => { PROJECTS = (Array.isArray(d.projects) ? d.projects : []).map(normalize); renderGrid(); })
-  .catch(() => { grid.textContent = ''; grid.append(el('p','grid-msg','Projects could not be loaded. Open the site through a web server (run python3 server.py) instead of double-clicking the file.')); });
+  .then(d => { applySite(d.site); PROJECTS = (Array.isArray(d.projects) ? d.projects : []).map(normalize); renderGrid(); })
+  .catch(() => { applySite(null); grid.textContent = ''; grid.append(el('p','grid-msg','Projects could not be loaded. Open the site through a web server (run python3 server.py) instead of double-clicking the file.')); });
 
 /* ===================== project pop-up ===================== */
 const pm = document.getElementById('pm'); let pmIdx = -1, pmReturn = null;
@@ -422,7 +451,7 @@ function openProject(i, from){
   box.textContent = ''; pages.textContent = ''; track.textContent = ''; track.scrollLeft = 0;
   const imgs = p.images || [], token = (openProject.token = (openProject.token||0) + 1);
   const live = () => token === openProject.token;
-  const mkImg = (src, k) => { const img = el('img'); img.alt = `${p.title} — image ${k+1}`; img.decoding = 'async'; img.loading = k < 4 ? 'eager' : 'lazy'; img.src = src; return img; };
+  const mkImg = (src, k) => { const img = el('img'); img.alt = `${p.title} — image ${k+1}`; img.decoding = 'async'; img.loading = (isPhone() && k > 2) ? 'lazy' : 'eager'; img.src = src; return img; };   // desktop loads all so pages group right away
   const ready = (img, fn) => { if (img.complete && img.naturalWidth) fn(); else { img.onload = fn; img.onerror = fn; } };
 
   if (isPhone()){
@@ -437,6 +466,26 @@ function openProject(i, from){
     document.body.classList.toggle('pf-on', imgs.length > 1); updateCount();
   } else {
     document.body.classList.remove('pf-on');
+    // Long website screenshots become page cards (three across). Once a project has any,
+    // its other portrait screenshots (e.g. a short contact page) join them so the set stays together.
+    const loaded = [];
+    const toPage = (x) => {
+      x.page = true;
+      const page = el('div','page'); page.dataset.k = x.k; page.tabIndex = 0;
+      page.setAttribute('aria-label', `${p.title} page ${x.k+1} — scroll inside, press Enter to enlarge`);
+      page.append(x.img); page.onclick = () => openZoom(imgs, x.k, p.title);
+      page.onkeydown = e => { if (e.key === 'Enter') openZoom(imgs, x.k, p.title); };
+      const after = [...pages.children].find(c => Number(c.dataset.k) > x.k); pages.insertBefore(page, after || null);
+      x.item.remove(); setTimeout(() => page.classList.add('in'), 40 + (x.k%3)*80);
+    };
+    const classify = () => {
+      const hasPages = loaded.some(x => x.r < 0.62);
+      loaded.forEach(x => {
+        if (x.page) return;
+        if (x.r < 0.62 || (hasPages && x.r < 0.85)) return toPage(x);
+        if (!x.shown){ x.shown = true; x.item.style.setProperty('--r', x.r.toFixed(3)); setTimeout(() => x.item.classList.add('in'), 40 + (x.k%6)*60); }
+      });
+    };
     imgs.forEach((src, k) => {
       const item = el('button','pm-item'); item.type = 'button'; item.dataset.k = k;
       item.setAttribute('aria-label', `Enlarge ${p.title} image ${k+1} of ${imgs.length}`);
@@ -445,16 +494,8 @@ function openProject(i, from){
       item.append(img); box.append(item);
       ready(img, () => {
         if (!live()) return;
-        const r = img.naturalWidth ? img.naturalWidth / img.naturalHeight : 1;
-        if (r < 0.62){ // long website page → rounded card, three across
-          const page = el('div','page'); page.dataset.k = k; page.tabIndex = 0;
-          page.setAttribute('aria-label', `${p.title} page ${k+1} — scroll inside, press Enter to enlarge`);
-          page.append(img); page.onclick = () => openZoom(imgs, k, p.title);
-          page.onkeydown = e => { if (e.key === 'Enter') openZoom(imgs, k, p.title); };
-          const after = [...pages.children].find(c => Number(c.dataset.k) > k); pages.insertBefore(page, after || null);
-          item.remove(); setTimeout(() => page.classList.add('in'), 40 + (k%3)*80); return;
-        }
-        item.style.setProperty('--r', r.toFixed(3)); setTimeout(() => item.classList.add('in'), 40 + (k%6)*60);
+        loaded.push({ k, img, item, r: img.naturalWidth ? img.naturalWidth / img.naturalHeight : 1 });
+        classify();
       });
     });
   }
